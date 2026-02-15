@@ -5,6 +5,9 @@ coverage/
 .DS_Store
 *.tgz
 
+# Documento interno de incidente (no publicar)
+SECURITY_CREDENTIALS_EXPOSED.md
+
 # SSH y claves privadas (nunca commitear)
 ssh-config/
 *.pem
