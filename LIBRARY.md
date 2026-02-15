@@ -65,6 +65,45 @@ const client = new OpenRouterImageClient({
 });
 ```
 
+#### Important Implementation Notes
+
+**Environment Variable Handling:**
+
+The `OpenRouterImageClient` class temporarily modifies `process.env` during method calls to pass configuration to the underlying core functions. This is by design and has the following implications:
+
+1. **Temporary Override**: Environment variables are set just before each operation and use the client's configuration values
+2. **Global Impact**: Since `process.env` is global, concurrent operations with different client instances could interfere with each other
+3. **Best Practice**: Use a single client instance per application when possible, or ensure operations are sequential
+
+**Example:**
+```javascript
+// The client internally sets process.env before each operation:
+// process.env.OPENROUTER_API_KEY = this._apiKey
+// process.env.OPENROUTER_BASE_URL = this._baseUrl
+// process.env.OPENROUTER_IMAGE_MODEL = this._defaultModel
+// etc.
+
+await client.generateImage('...');  // Sets env vars during this call
+await client.editImage('...', 'input.png');  // Sets env vars again
+```
+
+If you need to use multiple client instances with different configurations, ensure operations are not running concurrently:
+
+```javascript
+const client1 = new OpenRouterImageClient({ apiKey: 'key1', outputDir: './dir1' });
+const client2 = new OpenRouterImageClient({ apiKey: 'key2', outputDir: './dir2' });
+
+// OK: Sequential operations
+await client1.generateImage('...');
+await client2.generateImage('...');
+
+// AVOID: Concurrent operations (env vars will interfere)
+Promise.all([
+  client1.generateImage('...'),
+  client2.generateImage('...')
+]);
+```
+
 #### Methods
 
 ##### generateImage(prompt, options)

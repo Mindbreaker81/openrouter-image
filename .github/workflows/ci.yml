@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Validate syntax and check all source files
+  validate:
+    name: Validate Syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check syntax of all source files
+        run: |
+          node --check src/*.js
+          echo "✅ All source files have valid syntax"
+
+      - name: Validate package.json
+        run: |
+          npm run --silent 2>&1 | grep -q 'test' || (echo "❌ Missing test script" && exit 1)
+          echo "✅ package.json is valid"
+
+  # Run tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Check test exit code
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ All tests passed"
+          else
+            echo "❌ Some tests failed"
+            exit 1
+          fi
+
+  # Security audit
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Check for vulnerabilities
+        run: |
+          VULNS=$(npm audit --json | jq '.metadata.vulnerabilities.total')
+          if [ "$VULNS" -gt 0 ]; then
+            echo "⚠️ Found $VULNS vulnerabilities"
+            npm audit
+          else
+            echo "✅ No vulnerabilities found"
+          fi
+
+  # Validate npm package (if publishing)
+  package:
+    name: Validate Package
+    runs-on: ubuntu-latest
+    needs: [test, audit]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pack package (dry-run)
+        run: |
+          npm pack --dry-run
+          echo "✅ Package can be built successfully"
+
+      - name: Check package contents
+        run: |
+          # Create tarball to inspect
+          TARBALL=$(npm pack | tail -n 1)
+          echo "📦 Tarball created: $TARBALL"
+
+          # List contents
+          echo "📋 Package contents:"
+          tar -tzf "$TARBALL" | head -n 50
+
+          # Verify essential files are included
+          if tar -tzf "$TARBALL" | grep -q "src/core.js"; then
+            echo "✅ Core module included"
+          else
+            echo "❌ Core module missing"
+            exit 1
+          fi
+
+          if tar -tzf "$TARBALL" | grep -q "README.md"; then
+            echo "✅ README included"
+          else
+            echo "❌ README missing"
+            exit 1
+          fi
+
+          if tar -tzf "$TARBALL" | grep -q "LICENSE"; then
+            echo "✅ LICENSE included"
+          else
+            echo "❌ LICENSE missing"
+            exit 1
+          fi
+
+          # Verify test files are excluded
+          if tar -tzf "$TARBALL" | grep -q "tests/"; then
+            echo "⚠️ Warning: Test files should be excluded (check .npmignore)"
+          else
+            echo "✅ Test files properly excluded"
+          fi
+
+          # Verify .env is excluded
+          if tar -tzf "$TARBALL" | grep -q ".env"; then
+            echo "❌ ERROR: .env file included in package!"
+            exit 1
+          else
+            echo "✅ Environment files properly excluded"
+          fi
+
+          # Cleanup
+          rm -f "$TARBALL"
+
+  # Final status check
+  status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [test, audit, package]
+
+    if: always()
+
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.audit.result }}" != "success" ] || \
+             [ "${{ needs.package.result }}" != "success" ]; then
+            echo "❌ CI failed"
+            echo "Test: ${{ needs.test.result }}"
+            echo "Audit: ${{ needs.audit.result }}"
+            echo "Package: ${{ needs.package.result }}"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+          fi

@@ -47,12 +47,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.4.0] - 2026-02-15
 
-Todos los cambios notables de este proyecto se documentan en este archivo.
-
-El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
-
-## [0.4.0] - 2026-02-15
-
 ### Añadido
 
 - **CLI (`src/cli.js`)**: nueva interfaz de línea de comandos con los mismos flujos que el MCP server.

@@ -1,10 +1,10 @@
 {
-  "name": "openrouter-image-mcp",
+  "name": "@mindbreaker81/openrouter-image",
   "version": "0.5.0",
   "private": false,
   "type": "module",
   "description": "MCP server and CLI for image generation/editing via OpenRouter's Responses API",
-  "author": "",
+  "author": "https://github.com/mindbreaker81",
   "license": "MIT",
   "keywords": [
     "mcp",
@@ -39,9 +39,14 @@
   "scripts": {
     "start": "node src/server.js",
     "cli": "node src/cli.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:coverage": "c8 --reporter=html --reporter=text --reporter=lcov node --test",
+    "test:ci": "c8 --reporter=json --reporter=text node --test"
   },
   "dependencies": {
     "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "c8": "^10.1.3"
   }
 }

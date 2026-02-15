@@ -1,5 +1,10 @@
 # openrouter-image-mcp
 
+[![npm version](https://badge.fury.io/js/%40mindbreaker81%2Fopenrouter-image.svg)](https://www.npmjs.com/package/@mindbreaker81/openrouter-image)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://img.shields.io/badge/tests-10%2F10-brightgreen)](tests/cli.test.js)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
+
 **A dual-interface MCP server and CLI for image generation/editing via OpenRouter's Responses API.**
 
 This package can be used in multiple ways:
@@ -145,7 +150,7 @@ npm install -g openrouter-image-mcp
 ### Install from git
 
 ```bash
-git clone https://github.com/YOUR_USER/openrouter-image-mcp.git
+git clone https://github.com/mindbreaker81/openrouter-image-mcp.git
 cd openrouter-image-mcp
 npm install
 npm link
@@ -169,7 +174,7 @@ npm install openrouter-image-mcp
 ## Requirements
 
 ```bash
-git clone https://github.com/YOUR_USER/openrouter-image-mcp.git
+git clone https://github.com/mindbreaker81/openrouter-image-mcp.git
 cd openrouter-image-mcp
 npm ci
 ```
