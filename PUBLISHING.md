@@ -50,9 +50,14 @@ npm login
 > - It is **not required to be committed to git** (normally it should not be versioned)
 
 ```bash
-# Generates: mindbreaker81-openrouter-image-<version>.tgz
+# Build dynamic package artifact name from package.json
+PACKAGE_NAME=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
+PACKAGE_VERSION=$(node -p "require('./package.json').version")
+TGZ="${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+
+# Generates: $TGZ
 npm pack
-tar -tzf mindbreaker81-openrouter-image-0.5.0.tgz
+tar -tzf "$TGZ"
 ```
 
 Expected files:
@@ -70,20 +75,48 @@ Expected files:
 ### 4. Test Local Installation
 
 ```bash
+# Reuse variables from Step 3 (or define them again)
+PACKAGE_NAME=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
+PACKAGE_VERSION=$(node -p "require('./package.json').version")
+TGZ="${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+
 # Install globally to test CLI
-npm install -g ./mindbreaker81-openrouter-image-0.5.0.tgz
+npm install -g "./$TGZ"
 
 # Test CLI
 openrouter-image --version
 openrouter-image --help
 
 # Test as library in a temporary project
+PROJECT_DIR=$(pwd)
 mkdir /tmp/test-library && cd /tmp/test-library
-npm install ../mindbreaker81-openrouter-image-0.5.0.tgz
+npm install "$PROJECT_DIR/$TGZ"
 node -e "import('./node_modules/@mindbreaker81/openrouter-image/src/index.js').then(m => console.log('Version:', m.version))"
 ```
 
 If you don't have the `.tgz` file yet, run `npm pack` first in the project root.
+
+### Automated prepublish script
+
+This repository includes a helper script that automates the pre-publish checks described above.
+
+- Script: `scripts/prepublish-check.sh`
+- Purpose: Run tests, create the `.tgz` with `npm pack`, inspect the tarball contents, and verify a local install into a temporary project.
+- How to run locally:
+
+```bash
+# From the project root
+./scripts/prepublish-check.sh
+```
+
+- Shortcut via `npm`:
+
+```bash
+# From the project root
+npm run prepublish-check
+```
+
+The script exits non-zero when any check fails. On success it prints the path to the generated artifact and a short summary.
 
 ### 5. Publish to npm
 
@@ -109,8 +142,9 @@ openrouter-image --version
 ### 7. Update Repository Tags
 
 ```bash
-git tag v0.5.0
-git push origin v0.5.0
+PACKAGE_VERSION=$(node -p "require('./package.json').version")
+git tag "v$PACKAGE_VERSION"
+git push origin "v$PACKAGE_VERSION"
 ```
 
 ## Post-Publishing Tasks

@@ -40,6 +40,7 @@
     "start": "node src/server.js",
     "cli": "node src/cli.js",
     "test": "node --test",
+    "prepublish-check": "./scripts/prepublish-check.sh",
     "test:coverage": "c8 --reporter=html --reporter=text --reporter=lcov node --test",
     "test:ci": "c8 --reporter=json --reporter=text node --test"
   },
