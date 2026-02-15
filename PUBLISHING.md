@@ -147,6 +147,41 @@ git tag "v$PACKAGE_VERSION"
 git push origin "v$PACKAGE_VERSION"
 ```
 
+### Publish to GitHub Packages (optional)
+
+You can publish the same scoped package to GitHub Packages so it can be installed from GitHub's npm registry.
+
+Requirements:
+- Package name must be scoped (this project uses `@mindbreaker81/openrouter-image`).
+- A GitHub token with `write:packages` (or `repo` for classic tokens) scope.
+
+Quick steps (one-shot):
+
+```bash
+# Create a temporary .npmrc that points the scope to GitHub Packages
+export GHPKG_TOKEN=$(gh auth token)
+printf "@mindbreaker81:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=${GHPKG_TOKEN}\n" > .npmrc.ghpkg
+
+# Publish to GitHub Packages
+npm publish --registry=https://npm.pkg.github.com/
+
+# Remove the temporary file
+rm -f .npmrc.ghpkg
+```
+
+Notes and troubleshooting:
+- If `npm publish` fails with `ENEEDAUTH`, ensure the token has `write:packages` scope. Create a token at https://github.com/settings/tokens (classic) or via the GitHub UI for fine-grained tokens and grant `write:packages`.
+- Alternatively, add the following to `package.json` to make `npm publish` use GitHub Packages by default:
+
+```json
+"publishConfig": {
+  "registry": "https://npm.pkg.github.com/"
+}
+```
+
+- To publish multiple registries (npmjs and GitHub Packages) keep `publishConfig` unset and run `npm publish` with `--registry` for the target registry.
+
+
 ## Post-Publishing Tasks
 
 ### Test Library Installation

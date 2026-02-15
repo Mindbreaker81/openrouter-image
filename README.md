@@ -31,6 +31,7 @@ All interfaces share a **common core** (`src/core.js`) and offer identical capab
 ## Table of Contents
 
 - [Usage Modes](#usage-modes)
+  - [Publishing](PUBLISHING.md)
   - [As a Library](#as-a-library)
   - [As a CLI](#as-a-cli)
   - [As an MCP Server](#as-an-mcp-server)
