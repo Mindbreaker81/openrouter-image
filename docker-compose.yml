@@ -12,7 +12,7 @@ services:
       - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
       - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-openrouter-image}
     ports:
-      - "3003:3000"
+      - "3000:3000"
     volumes:
       - ./output:/data
     restart: unless-stopped

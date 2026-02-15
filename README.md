@@ -40,6 +40,7 @@ All interfaces share a **common core** (`src/core.js`) and offer identical capab
 - [Requirements](#requirements)
 - [Environment Variables](#environment-variables)
 - [MCP Server (HTTP)](#mcp-server-http)
+  - [Puerto del servidor y conflictos](#puerto-del-servidor-y-conflictos)
 - [CLI](#cli)
 - [MCP Tools — Reference](#mcp-tools--reference)
 - [Configuration in Coding Tools](#configuration-in-coding-tools)
@@ -102,8 +103,8 @@ openrouter-image list
 Run as an HTTP or stdio MCP server for integration with AI coding tools:
 
 ```bash
-# HTTP mode
-openrouter-image server --port 3003
+# HTTP mode (default port 3000)
+openrouter-image server
 
 # Stdio mode (for Claude Code)
 openrouter-image server --stdio
@@ -129,10 +130,6 @@ Then use directly in Claude Code:
 
 ---
 
-## Installation
-
----
-
 ## Requirements
 
 - **Node.js >= 20** (uses ES modules and `node:test`)
@@ -143,9 +140,7 @@ Then use directly in Claude Code:
 
 ## Installation
 
----
-
-### Install from npm (once published)
+### Install from npm
 
 ```bash
 npm install -g @mindbreaker81/openrouter-image
@@ -171,16 +166,6 @@ npm install -g mindbreaker81-openrouter-image-*.tgz
 
 ```bash
 npm install @mindbreaker81/openrouter-image
-```
-
----
-
-## Requirements
-
-```bash
-git clone https://github.com/mindbreaker81/openrouter-image.git
-cd openrouter-image
-npm ci
 ```
 
 ---
@@ -212,6 +197,21 @@ cp .env.example .env
 
 El servidor expone un endpoint MCP JSON-RPC sobre HTTP con autenticación Bearer.
 
+### Puerto del servidor y conflictos
+
+Por defecto el servidor usa el puerto **3000**. Comprueba que ese puerto no esté ya en uso en tu máquina antes de arrancar.
+
+**Comprobar si el puerto está libre:**
+
+- **Linux / macOS:** `lsof -i :3000` o `ss -tlnp | grep 3000`. Si hay salida, el puerto está ocupado.
+- **Windows:** `netstat -ano | findstr :3000`. Si aparece una línea con el puerto, está ocupado.
+
+**Cómo cambiar el puerto si está ocupado:**
+
+- **Con Node.js:** define la variable de entorno al arrancar, por ejemplo `PORT=3001 npm start`, o usa la CLI: `openrouter-image server --port 3001`.
+- **Con Docker:** en `docker-compose.yml` cambia el mapeo de puertos (ej. `"3001:3000"`). El primer número es el puerto en tu PC; el segundo es el interno del contenedor. Para `docker run`, usa por ejemplo `-p 3001:3000`.
+- Si cambias el puerto, actualiza la URL en la configuración MCP de tu cliente (Cursor, Claude Code, etc.): por ejemplo `http://localhost:3001/mcp` en lugar de `http://localhost:3000/mcp`.
+
 ### Run with Docker Compose
 
 ```bash
@@ -221,7 +221,7 @@ cp .env.example .env
 docker compose up -d --build
 
 # Health check
-curl http://localhost:3003/health
+curl http://localhost:3000/health
 ```
 
 Saved images will be in `./output/` (mounted as `/data` in the container).
@@ -232,7 +232,7 @@ Saved images will be in `./output/` (mounted as `/data` in the container).
 docker build -t openrouter-image .
 
 docker run -d --name openrouter-image \
-  -p 3003:3000 \
+  -p 3000:3000 \
   -e AUTH_TOKEN=mi-token-secreto \
   -e OPENROUTER_API_KEY=sk-or-... \
   -e OPENROUTER_IMAGE_MODEL=google/gemini-2.5-flash-image \
@@ -252,7 +252,7 @@ npm start
 node src/server.js
 
 # Or via CLI
-openrouter-image server --port 3003
+openrouter-image server --port 3000
 ```
 
 ### Run with Node.js (stdio mode)
@@ -278,10 +278,10 @@ node src/server.js --stdio
 
 ```bash
 # Health
-curl http://localhost:3003/health
+curl http://localhost:3000/health
 
 # Listar tools MCP
-curl -X POST http://localhost:3003/mcp \
+curl -X POST http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
@@ -505,7 +505,7 @@ Este servidor MCP es compatible con múltiples herramientas de desarrollo asisti
 {
   "mcpServers": {  // o "servers" para VS Code
     "openrouter-image": {
-      "url": "http://localhost:3003/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer TU_AUTH_TOKEN"
       }
@@ -522,7 +522,7 @@ En `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "openrouter-image": {
-      "url": "http://localhost:3003/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer ${env:AUTH_TOKEN}"
       }
@@ -537,7 +537,7 @@ En `~/.cursor/mcp.json`:
 
 ```bash
 claude mcp add --transport http openrouter-image \
-  http://localhost:3003/mcp \
+  http://localhost:3000/mcp \
   --env AUTH_TOKEN="tu-token-aqui"
 ```
 
@@ -548,7 +548,7 @@ claude mcp add --transport http openrouter-image \
   "mcpServers": {
     "openrouter-image": {
       "type": "http",
-      "url": "http://localhost:3003/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer ${env:AUTH_TOKEN}"
       }
@@ -566,7 +566,7 @@ En `.vscode/mcp.json` (raíz del proyecto):
   "servers": {
     "openrouter-image": {
       "type": "http",
-      "url": "http://localhost:3003/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer ${input:auth-token}"
       }
@@ -593,7 +593,7 @@ Si ejecutas el MCP server en una máquina remota (ej. vía Tailscale):
 {
   "mcpServers": {
     "openrouter-image": {
-      "url": "http://100.82.111.22:3003/mcp",
+      "url": "http://100.82.111.22:3000/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_TOKEN"
       }
@@ -618,7 +618,7 @@ set -a && . ./.env && set +a
 ### Generar imagen y guardar (sin base64 en respuesta)
 
 ```bash
-curl -fsS http://localhost:3003/mcp \
+curl -fsS http://localhost:3000/mcp \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   --data '{
@@ -640,7 +640,7 @@ curl -fsS http://localhost:3003/mcp \
 ### Editar imagen existente
 
 ```bash
-curl -fsS http://localhost:3003/mcp \
+curl -fsS http://localhost:3000/mcp \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   --data '{
@@ -663,7 +663,7 @@ curl -fsS http://localhost:3003/mcp \
 ### Listar imágenes guardadas
 
 ```bash
-curl -fsS http://localhost:3003/mcp \
+curl -fsS http://localhost:3000/mcp \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   --data '{
@@ -680,7 +680,7 @@ curl -fsS http://localhost:3003/mcp \
 ### Recuperar una imagen guardada
 
 ```bash
-curl -fsS http://localhost:3003/mcp \
+curl -fsS http://localhost:3000/mcp \
   -H 'Content-Type: application/json' \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   --data '{
