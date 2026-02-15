@@ -1,0 +1,24 @@
+services:
+  openrouter-image-mcp:
+    build: .
+    container_name: openrouter-image-mcp
+    environment:
+      - PORT=3000
+      - AUTH_TOKEN=${AUTH_TOKEN}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENROUTER_IMAGE_MODEL=${OPENROUTER_IMAGE_MODEL}
+      - OUTPUT_DIR=/data
+      - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
+      - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-openrouter-image-mcp}
+    ports:
+      - "3003:3000"
+    volumes:
+      - ./output:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
