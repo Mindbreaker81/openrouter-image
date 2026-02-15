@@ -1,0 +1,44 @@
+# Test files
+tests/
+*.test.js
+
+# Scripts (development only)
+scripts/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Documentation (not needed in package)
+.vscode/
+.idea/
+*.md
+!README.md
+!CHANGELOG.md
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Output directories (runtime only)
+output/
+data/
+
+# Git
+.git/
+.gitignore
+
+# Docker (users will build or use pre-built images)
+Dockerfile*
+docker-compose.yml
+.dockerignore
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db

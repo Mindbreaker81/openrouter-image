@@ -18,6 +18,9 @@ import {
   formatModelsAsMarkdown,
 } from "./core.js";
 
+// Check if --stdio flag is present
+const USE_STDIO = process.argv.includes("--stdio");
+
 const app = express();
 app.use(express.json({ limit: "25mb" }));
 
@@ -407,12 +410,24 @@ app.post("/mcp", async (req, res) => {
   }
 });
 
-app.listen(PORT, "0.0.0.0", async () => {
-  try {
-    await fs.mkdir(OUTPUT_DIR, { recursive: true });
-  } catch {
-    // ignore
+// Main entry point
+async function main() {
+  // Stdio mode - no authentication required for local communication
+  if (USE_STDIO) {
+    const { startStdioServer } = await import("./mcp-stdio.js");
+    await startStdioServer();
+    return;
   }
-  // eslint-disable-next-line no-console
-  console.log(`openrouter-image-mcp listening on :${PORT}`);
+
+  // HTTP mode - requires Bearer token authentication
+  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+  app.listen(PORT, "0.0.0.0", () => {
+    // eslint-disable-next-line no-console
+    console.log(`openrouter-image-mcp listening on :${PORT}`);
+  });
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });

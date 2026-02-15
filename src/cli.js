@@ -30,9 +30,14 @@ Commands:
   models                    List image models from OpenRouter
   list                      List images currently stored under OUTPUT_DIR
   read <path>               Read image metadata and optionally write a local copy
+  server                    Start MCP server (HTTP or stdio)
 
 Global options:
   -h, --help                Show help
+
+server options:
+  --stdio                   Start server in stdio mode (for Claude Code/MCP clients)
+  --port <n>                HTTP port (default: 3000, ignored with --stdio)
 
 generate/edit options:
   -m, --model <id>          OpenRouter model id (defaults to OPENROUTER_IMAGE_MODEL)
@@ -55,7 +60,7 @@ read options:
 
 Env:
   OPENROUTER_API_KEY, OPENROUTER_IMAGE_MODEL, OUTPUT_DIR, OPENROUTER_BASE_URL,
-  OPENROUTER_SITE_URL, OPENROUTER_APP_NAME
+  OPENROUTER_SITE_URL, OPENROUTER_APP_NAME, AUTH_TOKEN (HTTP server only)
 
 Default OUTPUT_DIR: ${OUTPUT_DIR}
 `);
@@ -226,6 +231,36 @@ async function commandGenerateOrEdit(command, args) {
   console.log(lines.join("\n"));
 }
 
+async function commandServer(args) {
+  const { values } = parseArgs({
+    args,
+    options: {
+      help: { type: "boolean", short: "h" },
+      stdio: { type: "boolean" },
+      port: { type: "string" },
+    },
+    strict: true,
+    allowPositionals: false,
+  });
+
+  if (values.help) return printUsage();
+
+  // Import and run the server
+  const serverModule = await import("./server.js");
+
+  if (values.stdio) {
+    // Stdio mode - server will detect --stdio in process.argv
+    await import("./server.js");
+  } else {
+    // HTTP mode - server is already started by the import
+    // Set custom port if provided
+    if (values.port) {
+      process.env.PORT = values.port;
+    }
+    await import("./server.js");
+  }
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const [command, ...rest] = argv;
@@ -235,10 +270,17 @@ async function main() {
     return;
   }
 
+  if (command === "-v" || command === "--version") {
+    const { version } = await import("./index.js");
+    console.log(`openrouter-image v${version}`);
+    return;
+  }
+
   if (command === "models") return commandModels();
   if (command === "list") return commandList(rest);
   if (command === "read") return commandRead(rest);
   if (command === "generate" || command === "edit") return commandGenerateOrEdit(command, rest);
+  if (command === "server") return commandServer(rest);
 
   throw new Error(`Unknown command: ${command}`);
 }

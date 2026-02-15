@@ -1,5 +1,52 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [0.5.0] - 2025-02-15 (Library Release)
+
+### Added
+
+- **Library API (`src/index.js`, `src/client.js`)**: Programmatic interface for Node.js applications
+  - `OpenRouterImageClient` class with methods: `generateImage()`, `editImage()`, `listModels()`, `getModelsMarkdown()`, `listImages()`, `readImage()`
+  - Full TypeScript support with JSDoc annotations
+  - Configurable via constructor options or environment variables
+  - Documentation: `LIBRARY.md` with API reference and examples
+- **MCP Stdio Transport (`src/mcp-stdio.js`)**: Stdio-based MCP server for Claude Code
+  - Reads JSON-RPC from stdin, writes responses to stdout
+  - No authentication required for local communication
+  - `server --stdio` command in CLI
+- **Subpath exports**: Package can be imported as `openrouter-image-mcp`, `openrouter-image-mcp/client`, `openrouter-image-mcp/core`
+- **MIT License**: Added LICENSE file for public distribution
+- **`.npmignore`**: Excludes tests, scripts, and development files from npm package
+- **`package.json` updates**:
+  - `private: false` for public publishing
+  - `exports` field for subpath exports
+  - `files` field to control published content
+  - `keywords` for npm discoverability
+  - Added `license` and `description` fields
+- **CLI `--version` flag**: Shows package version
+- **CLI `server` command**: Starts MCP server in HTTP or stdio mode
+- **`scripts/install-claude.sh`**: Automated installation script for Claude Code configuration
+- **`CLAUDE_SKILL.md`**: Comprehensive guide for Claude Code skill installation and usage
+
+### Changed
+
+- **README.md**: Reorganized with 4 usage modes (Library, CLI, MCP Server, Claude Code Skill)
+  - Added quick start examples for each mode
+  - Links to detailed documentation (LIBRARY.md, CLAUDE_SKILL.md)
+  - English documentation with improved structure
+
+### Technical
+
+- All source files validated with `node --check`
+- All existing tests pass (10/10)
+- npm pack produces 21.5 kB tarball with only necessary files
+- Library exports verified working
+
+## [0.4.0] - 2026-02-15
+
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).

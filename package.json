@@ -1,14 +1,41 @@
 {
   "name": "openrouter-image-mcp",
-  "version": "0.3.0",
-  "private": true,
+  "version": "0.5.0",
+  "private": false,
   "type": "module",
+  "description": "MCP server and CLI for image generation/editing via OpenRouter's Responses API",
+  "author": "",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "openrouter",
+    "image-generation",
+    "image-editing",
+    "ai",
+    "cli",
+    "midjourney",
+    "dall-e",
+    "stable-diffusion",
+    "flux"
+  ],
   "bin": {
     "openrouter-image": "src/cli.js"
   },
   "engines": {
     "node": ">=20"
   },
+  "exports": {
+    ".": "./src/index.js",
+    "./client": "./src/client.js",
+    "./core": "./src/core.js"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "start": "node src/server.js",
     "cli": "node src/cli.js",

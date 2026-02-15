@@ -1,8 +1,14 @@
 # openrouter-image-mcp
 
-Servidor MCP (HTTP) + CLI para generar, editar, listar y leer imágenes usando los modelos de imagen de [OpenRouter](https://openrouter.ai) (Responses API).
+**A dual-interface MCP server and CLI for image generation/editing via OpenRouter's Responses API.**
 
-Ambos interfaces (MCP y CLI) comparten un **núcleo común** (`src/core.js`) y ofrecen exactamente las mismas capacidades:
+This package can be used in multiple ways:
+- **📚 As a Library** - Programmatic API for Node.js applications
+- **🖥️ As a CLI** - Command-line interface for automation and scripting
+- **🔌 As an MCP Server** - For Claude Code, Cursor, and other MCP-compatible tools
+- **🤖 As a Claude Code Skill** - Native integration with Claude Code
+
+All interfaces share a **common core** (`src/core.js`) and offer identical capabilities.
 
 | Capacidad | MCP tool | CLI command |
 |---|---|---|
@@ -14,49 +20,153 @@ Ambos interfaces (MCP y CLI) comparten un **núcleo común** (`src/core.js`) y o
 
 ---
 
-## Tabla de contenidos
+## Table of Contents
 
-- [Requisitos](#requisitos)
-- [Instalación](#instalación)
-  - [Clonar e instalar](#clonar-e-instalar)
-  - [Instalar la CLI globalmente](#instalar-la-cli-globalmente)
-  - [Instalar desde tarball (npm pack)](#instalar-desde-tarball-npm-pack)
-- [Variables de entorno](#variables-de-entorno)
-- [Servidor MCP (HTTP)](#servidor-mcp-http)
-  - [Ejecutar con Docker Compose](#ejecutar-con-docker-compose)
-  - [Ejecutar con Docker standalone](#ejecutar-con-docker-standalone)
-  - [Ejecutar con Node.js](#ejecutar-con-nodejs)
-  - [Endpoints](#endpoints)
-  - [Verificación](#verificación)
+- [Usage Modes](#usage-modes)
+  - [As a Library](#as-a-library)
+  - [As a CLI](#as-a-cli)
+  - [As an MCP Server](#as-an-mcp-server)
+  - [As a Claude Code Skill](#as-a-claude-code-skill)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Environment Variables](#environment-variables)
+- [MCP Server (HTTP)](#mcp-server-http)
 - [CLI](#cli)
-  - [Usar la CLI](#usar-la-cli)
-  - [Comandos CLI](#comandos-cli)
-  - [Ejecutar con Docker (CLI)](#ejecutar-con-docker-cli)
-- [MCP Tools — Referencia](#mcp-tools--referencia)
-  - [generate_image](#generate_image)
-  - [edit_image](#edit_image)
-  - [list_image_models](#list_image_models)
-  - [list_output_images](#list_output_images)
-  - [read_output_image](#read_output_image)
-- [Configuración en herramientas de coding](#configuración-en-herramientas-de-coding)
-- [Ejemplos curl (MCP JSON-RPC)](#ejemplos-curl-mcp-json-rpc)
+- [MCP Tools — Reference](#mcp-tools--reference)
+- [Configuration in Coding Tools](#configuration-in-coding-tools)
+- [Curl Examples (MCP JSON-RPC)](#curl-examples-mcp-json-rpc)
 - [Tests](#tests)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Seguridad](#seguridad)
+- [Project Structure](#project-structure)
+- [Security](#security)
+- [License](#license)
 
 ---
 
-## Requisitos
+## Usage Modes
 
-- **Node.js >= 20** (usa ES modules y `node:test`)
-- **npm** (incluido con Node.js)
-- Una **API key de OpenRouter** (`OPENROUTER_API_KEY`)
+### As a Library
+
+Use the `OpenRouterImageClient` class in your Node.js applications:
+
+```javascript
+import { OpenRouterImageClient } from 'openrouter-image-mcp';
+
+const client = new OpenRouterImageClient({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  defaultModel: 'google/gemini-2.5-flash-image'
+});
+
+// Generate an image
+const result = await client.generateImage('A sunset over mountains', {
+  outputPath: 'sunset.png'
+});
+
+console.log(`Image saved to: ${result.savedPath}`);
+```
+
+**Documentation:** See [LIBRARY.md](LIBRARY.md) for full API reference and examples.
+
+### As a CLI
+
+Install globally and use from the command line:
+
+```bash
+npm install -g openrouter-image-mcp
+
+# Generate an image
+openrouter-image generate "A futuristic city" -o city.png
+
+# Edit an image
+openrouter-image edit "Make it rainy" -i city.png -o rainy-city.png
+
+# List available models
+openrouter-image models
+
+# List saved images
+openrouter-image list
+```
+
+**See below for [CLI documentation](#cli).**
+
+### As an MCP Server
+
+Run as an HTTP or stdio MCP server for integration with AI coding tools:
+
+```bash
+# HTTP mode
+openrouter-image server --port 3003
+
+# Stdio mode (for Claude Code)
+openrouter-image server --stdio
+```
+
+**See below for [MCP Server documentation](#mcp-server-http).**
+
+### As a Claude Code Skill
+
+Install and configure as a native Claude Code skill:
+
+```bash
+npm install -g openrouter-image-mcp
+./scripts/install-claude.sh
+```
+
+Then use directly in Claude Code:
+- "Generate an image of a sunset"
+- "Edit diagram.png to add a database"
+- "Show me all available models"
+
+**Documentation:** See [CLAUDE_SKILL.md](CLAUDE_SKILL.md) for detailed setup instructions.
 
 ---
 
-## Instalación
+## Installation
 
-### Clonar e instalar
+---
+
+## Requirements
+
+- **Node.js >= 20** (uses ES modules and `node:test`)
+- **npm** (included with Node.js)
+- An **OpenRouter API key** ([Get one here](https://openrouter.ai/keys))
+
+---
+
+## Installation
+
+---
+
+### Install from npm (once published)
+
+```bash
+npm install -g openrouter-image-mcp
+```
+
+### Install from git
+
+```bash
+git clone https://github.com/YOUR_USER/openrouter-image-mcp.git
+cd openrouter-image-mcp
+npm install
+npm link
+```
+
+### Install from tarball
+
+```bash
+npm pack
+npm install -g openrouter-image-mcp-*.tgz
+```
+
+### Install as a library dependency
+
+```bash
+npm install openrouter-image-mcp
+```
+
+---
+
+## Requirements
 
 ```bash
 git clone https://github.com/YOUR_USER/openrouter-image-mcp.git
@@ -64,33 +174,9 @@ cd openrouter-image-mcp
 npm ci
 ```
 
-### Instalar la CLI globalmente
-
-```bash
-# Desde el directorio del repo
-npm link
-
-# Ahora puedes usar el comando en cualquier lugar:
-openrouter-image --help
-```
-
-### Instalar desde tarball (npm pack)
-
-```bash
-# Generar el paquete
-npm pack
-# → openrouter-image-mcp-0.3.0.tgz
-
-# Instalar globalmente en este u otro servidor
-npm install -g openrouter-image-mcp-0.3.0.tgz
-
-# Verificar
-openrouter-image --help
-```
-
 ---
 
-## Variables de entorno
+## Environment Variables
 
 Copia `.env.example` a `.env` y rellena los valores:
 
@@ -113,15 +199,15 @@ cp .env.example .env
 
 ---
 
-## Servidor MCP (HTTP)
+## MCP Server (HTTP)
 
 El servidor expone un endpoint MCP JSON-RPC sobre HTTP con autenticación Bearer.
 
-### Ejecutar con Docker Compose
+### Run with Docker Compose
 
 ```bash
 cp .env.example .env
-# Editar .env: AUTH_TOKEN, OPENROUTER_API_KEY, OPENROUTER_IMAGE_MODEL
+# Edit .env: AUTH_TOKEN, OPENROUTER_API_KEY, OPENROUTER_IMAGE_MODEL
 
 docker compose up -d --build
 
@@ -129,9 +215,9 @@ docker compose up -d --build
 curl http://localhost:3003/health
 ```
 
-Las imágenes guardadas quedan en `./output/` (montado como `/data` en el contenedor).
+Saved images will be in `./output/` (mounted as `/data` in the container).
 
-### Ejecutar con Docker standalone
+### Run with Docker standalone
 
 ```bash
 docker build -t openrouter-image-mcp .
@@ -145,16 +231,31 @@ docker run -d --name openrouter-image-mcp \
   openrouter-image-mcp
 ```
 
-### Ejecutar con Node.js
+### Run with Node.js (HTTP mode)
 
 ```bash
-# Cargar variables de entorno
+# Load environment variables
 set -a && . ./.env && set +a
 
-# Iniciar
+# Start server
 npm start
-# o directamente:
+# or:
 node src/server.js
+
+# Or via CLI
+openrouter-image server --port 3003
+```
+
+### Run with Node.js (stdio mode)
+
+```bash
+openrouter-image server --stdio
+```
+
+Or directly:
+
+```bash
+node src/server.js --stdio
 ```
 
 ### Endpoints
@@ -275,20 +376,20 @@ openrouter-image read tests/cyberpunk.png --copy-to /tmp/local-copy.png
 | `--mime-type` | Sobreescribir el MIME type en la salida |
 | `--copy-to` | Escribir una copia en cualquier ruta local |
 
-### Ejecutar con Docker (CLI)
+### Run with Docker (CLI)
 
-Se incluye un `Dockerfile.cli` dedicado (separado del `Dockerfile` del MCP):
+A dedicated `Dockerfile.cli` is included (separate from the MCP server `Dockerfile`):
 
 ```bash
-# Construir imagen CLI
+# Build CLI image
 docker build -f Dockerfile.cli -t openrouter-image-cli .
 
-# Listar modelos
+# List models
 docker run --rm \
   -e OPENROUTER_API_KEY=sk-or-... \
   openrouter-image-cli models
 
-# Generar imagen con volumen montado
+# Generate image with mounted volume
 docker run --rm \
   -e OPENROUTER_API_KEY=sk-or-... \
   -v $(pwd)/output:/data \
@@ -296,7 +397,7 @@ docker run --rm \
     -m google/gemini-2.5-flash-image \
     -o tests/landscape.png
 
-# Listar imágenes guardadas
+# List saved images
 docker run --rm \
   -v $(pwd)/output:/data \
   openrouter-image-cli list
@@ -370,7 +471,7 @@ Lee una imagen de disco y la devuelve como contenido MCP `type: image`.
 
 ---
 
-## Configuración en herramientas de coding
+## Configuration in Coding Tools
 
 Este servidor MCP es compatible con múltiples herramientas de desarrollo asistido por IA.
 
@@ -495,7 +596,7 @@ Si ejecutas el MCP server en una máquina remota (ej. vía Tailscale):
 
 ---
 
-## Ejemplos curl (MCP JSON-RPC)
+## Curl Examples (MCP JSON-RPC)
 
 Carga primero las variables de entorno:
 
@@ -598,7 +699,7 @@ Los tests cubren:
 
 ---
 
-## Estructura del proyecto
+## Project Structure
 
 ```
 openrouter-image-mcp/
@@ -624,7 +725,7 @@ openrouter-image-mcp/
 
 ---
 
-## Seguridad
+## Security
 
 - **Autenticación**: el endpoint `/mcp` requiere `Authorization: Bearer <AUTH_TOKEN>`. Genera un token fuerte: `openssl rand -hex 32`.
 - **Path traversal**: `safeJoinOutputDir()` impide que rutas relativas escapen de `OUTPUT_DIR`.
@@ -641,6 +742,6 @@ openrouter-image-mcp/
 
 ---
 
-## Licencia
+## License
 
-Ver `LICENSE` si existe, o consultar `package.json`.
+MIT - See [LICENSE](LICENSE) file.
