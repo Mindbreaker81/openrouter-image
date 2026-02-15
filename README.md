@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 MD031 MD032 MD040 MD051 MD060 -->
+
 # openrouter-image-mcp
 
 [![npm version](https://badge.fury.io/js/%40mindbreaker81%2Fopenrouter-image.svg)](https://www.npmjs.com/package/@mindbreaker81/openrouter-image)
@@ -54,7 +56,7 @@ All interfaces share a **common core** (`src/core.js`) and offer identical capab
 Use the `OpenRouterImageClient` class in your Node.js applications:
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -76,7 +78,7 @@ console.log(`Image saved to: ${result.savedPath}`);
 Install globally and use from the command line:
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 
 # Generate an image
 openrouter-image generate "A futuristic city" -o city.png
@@ -112,7 +114,7 @@ openrouter-image server --stdio
 Install and configure as a native Claude Code skill:
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 ./scripts/install-claude.sh
 ```
 
@@ -144,7 +146,7 @@ Then use directly in Claude Code:
 ### Install from npm (once published)
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 ```
 
 ### Install from git
@@ -160,13 +162,13 @@ npm link
 
 ```bash
 npm pack
-npm install -g openrouter-image-mcp-*.tgz
+npm install -g mindbreaker81-openrouter-image-*.tgz
 ```
 
 ### Install as a library dependency
 
 ```bash
-npm install openrouter-image-mcp
+npm install @mindbreaker81/openrouter-image
 ```
 
 ---
@@ -529,14 +531,16 @@ En `~/.cursor/mcp.json`:
 
 ### Ejemplo: Claude Code
 
-**Opción 1: CLI**
+#### Opción 1: CLI
+
 ```bash
 claude mcp add --transport http openrouter-image-mcp \
   http://localhost:3003/mcp \
   --env AUTH_TOKEN="tu-token-aqui"
 ```
 
-**Opción 2: Archivo `~/.claude.json`**
+#### Opción 2: Archivo `~/.claude.json`
+
 ```json
 {
   "mcpServers": {

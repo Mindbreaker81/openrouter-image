@@ -1,6 +1,6 @@
 # OpenRouter models con salida de imagen (output_modalities=image)
 
-Fecha de extracción: 2026-02-07
+Fecha de extracción: 2026-02-15
 
 Fuente (UI): https://openrouter.ai/models?fmt=cards&output_modalities=image
 
@@ -11,9 +11,10 @@ Cómo se obtuvo la lista:
 
 Notas:
 - Este documento lista los modelos cuyo `output_modalities` incluye `"image"` en el endpoint usado por la UI.
-- Los precios se copian tal cual aparecen en `endpoint.pricing` del **endpoint por defecto** (API verificada 2026-02-07).
+- Los precios se copian tal cual aparecen en `endpoint.pricing` del **endpoint por defecto** (API verificada 2026-02-15).
 - Si un modelo no trae `endpoint`/`pricing` en esta respuesta (o tiene múltiples endpoints), los precios pueden aparecer vacíos o variar.
 - Este listado es para **salida** de imagen (no solo soporte de entrada).
+- Actualización 2026-02-15: **sin cambios detectados** en IDs de modelos ni en precios base frente al corte 2026-02-07.
 
 Resumen (según el endpoint que usa la UI):
 - Total modelos con `output_modalities=image`: 16

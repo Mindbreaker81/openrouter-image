@@ -18,6 +18,9 @@ import {
   formatModelsAsMarkdown,
 } from "./core.js";
 
+const packageJson = await import("../package.json", { with: { type: "json" } });
+const SERVER_VERSION = packageJson.default.version;
+
 // Check if --stdio flag is present
 const USE_STDIO = process.argv.includes("--stdio");
 
@@ -86,7 +89,7 @@ app.post("/mcp", async (req, res) => {
             protocolVersion,
             serverInfo: {
               name: "openrouter-image-mcp",
-              version: "0.3.0",
+              version: SERVER_VERSION,
             },
             capabilities: {
               tools: {},

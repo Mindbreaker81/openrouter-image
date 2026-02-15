@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD031 MD032 MD034 MD040 -->
+
 # Claude Code Skill Installation Guide
 
 This document describes how to install and use `openrouter-image-mcp` as a Claude Code skill.
@@ -15,7 +17,7 @@ This document describes how to install and use `openrouter-image-mcp` as a Claud
 Once published to npm:
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 ```
 
 Or with a scoped package:
@@ -37,7 +39,7 @@ npm link
 
 ```bash
 npm pack
-npm install -g openrouter-image-mcp-*.tgz
+npm install -g mindbreaker81-openrouter-image-*.tgz
 ```
 
 ## Configuration

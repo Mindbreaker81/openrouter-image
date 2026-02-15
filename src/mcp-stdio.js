@@ -26,9 +26,11 @@ import {
   formatModelsAsMarkdown,
 } from "./core.js";
 
+const packageJson = await import("../package.json", { with: { type: "json" } });
+
 const SERVER_INFO = {
   name: "openrouter-image-mcp",
-  version: "0.3.0",
+  version: packageJson.default.version,
 };
 
 function jsonrpcError(id, code, message, data) {

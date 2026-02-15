@@ -1,11 +1,13 @@
+<!-- markdownlint-disable MD031 MD032 -->
+
 # Library Documentation
 
-This document describes how to use `openrouter-image-mcp` as a programmable library in Node.js applications.
+This document describes how to use `@mindbreaker81/openrouter-image` as a programmable library in Node.js applications.
 
 ## Installation
 
 ```bash
-npm install openrouter-image-mcp
+npm install @mindbreaker81/openrouter-image
 ```
 
 Or with a scoped package name:
@@ -17,7 +19,7 @@ npm install @your-org/openrouter-image
 ## Quick Start
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 // Initialize the client
 const client = new OpenRouterImageClient({
@@ -280,7 +282,7 @@ const client = new OpenRouterImageClient();
 If you need lower-level access to the core functions without the client wrapper:
 
 ```javascript
-import * as core from 'openrouter-image-mcp/core';
+import * as core from '@mindbreaker81/openrouter-image/core';
 
 // Call OpenRouter API directly
 const response = await core.callOpenRouterResponses({
@@ -302,7 +304,7 @@ await fs.writeFile(safePath, Buffer.from(data, 'base64'));
 ### Error Handling
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY
@@ -329,7 +331,7 @@ try {
 The package includes TypeScript types. Import with type annotations:
 
 ```typescript
-import { OpenRouterImageClient, ImageResult } from 'openrouter-image-mcp';
+import { OpenRouterImageClient, ImageResult } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY!,
@@ -349,7 +351,7 @@ console.log(`Saved to: ${result.savedPath}`);
 
 ```javascript
 import express from 'express';
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const app = express();
 const client = new OpenRouterImageClient();
@@ -378,7 +380,7 @@ app.listen(3000);
 ### Batch Processing
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient();
 
@@ -400,7 +402,7 @@ for (const prompt of prompts) {
 ### Image Editing Pipeline
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient();
 

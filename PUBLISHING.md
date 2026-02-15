@@ -1,6 +1,8 @@
+<!-- markdownlint-disable MD032 MD040 -->
+
 # Publishing Checklist
 
-This document provides step-by-step instructions for publishing `openrouter-image-mcp` to npm.
+This document provides step-by-step instructions for publishing `@mindbreaker81/openrouter-image` to npm.
 
 ## Pre-Publishing Checklist
 
@@ -25,7 +27,7 @@ If you want to publish under a scoped package name:
 
 ```bash
 # Edit package.json name field
-# From: "name": "openrouter-image-mcp"
+# From: "name": "@mindbreaker81/openrouter-image"
 # To: "name": "@your-org/openrouter-image"
 ```
 
@@ -40,7 +42,7 @@ npm login
 
 ```bash
 npm pack
-tar -tzf openrouter-image-mcp-0.5.0.tgz
+tar -tzf mindbreaker81-openrouter-image-0.5.0.tgz
 ```
 
 Expected files:
@@ -59,7 +61,7 @@ Expected files:
 
 ```bash
 # Install globally to test CLI
-npm install -g ./openrouter-image-mcp-0.5.0.tgz
+npm install -g ./mindbreaker81-openrouter-image-0.5.0.tgz
 
 # Test CLI
 openrouter-image --version
@@ -67,8 +69,8 @@ openrouter-image --help
 
 # Test as library in a temporary project
 mkdir /tmp/test-library && cd /tmp/test-library
-npm install ../openrouter-image-mcp-0.5.0.tgz
-node -e "import('./node_modules/openrouter-image-mcp/src/index.js').then(m => console.log('Version:', m.version))"
+npm install ../mindbreaker81-openrouter-image-0.5.0.tgz
+node -e "import('./node_modules/@mindbreaker81/openrouter-image/src/index.js').then(m => console.log('Version:', m.version))"
 ```
 
 ### 5. Publish to npm
@@ -85,10 +87,10 @@ npm publish --access public
 
 ```bash
 # View package info
-npm view openrouter-image-mcp
+npm view @mindbreaker81/openrouter-image
 
 # Test installation from npm
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 openrouter-image --version
 ```
 
@@ -105,11 +107,11 @@ git push origin v0.5.0
 
 ```bash
 # In a new project
-npm install openrouter-image-mcp
+npm install @mindbreaker81/openrouter-image
 ```
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY
 });
@@ -119,14 +121,14 @@ const client = new OpenRouterImageClient({
 ### Test CLI Installation
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 openrouter-image generate "test" -o test.png
 ```
 
 ### Test Claude Code Installation
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 ./scripts/install-claude.sh
 ```
 
@@ -135,7 +137,7 @@ Then restart Claude Code and test: "Generate an image of a sunset"
 ### Update GitHub Repository
 
 - Update README with installation instructions from npm
-- Add npm badge: `[![npm version](https://badge.fury.io/js/openrouter-image-mcp.svg)](https://www.npmjs.com/package/openrouter-image-mcp)`
+- Add npm badge: `[![npm version](https://badge.fury.io/js/%40mindbreaker81%2Fopenrouter-image.svg)](https://www.npmjs.com/package/@mindbreaker81/openrouter-image)`
 - Create GitHub release for v0.5.0
 
 ## Troubleshooting

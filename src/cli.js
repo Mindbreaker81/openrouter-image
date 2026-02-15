@@ -245,20 +245,11 @@ async function commandServer(args) {
 
   if (values.help) return printUsage();
 
-  // Import and run the server
-  const serverModule = await import("./server.js");
-
-  if (values.stdio) {
-    // Stdio mode - server will detect --stdio in process.argv
-    await import("./server.js");
-  } else {
-    // HTTP mode - server is already started by the import
-    // Set custom port if provided
-    if (values.port) {
-      process.env.PORT = values.port;
-    }
-    await import("./server.js");
+  if (!values.stdio && values.port) {
+    process.env.PORT = values.port;
   }
+
+  await import("./server.js");
 }
 
 async function main() {

@@ -1,16 +1,18 @@
+<!-- markdownlint-disable MD031 MD032 MD040 -->
+
 # Ejemplos de Instalación
 
 ## Caso 1: Desarrollador quiere usar la librería en su proyecto
 
 ```bash
 cd mi-proyecto-web
-npm install openrouter-image-mcp
+npm install @mindbreaker81/openrouter-image
 ```
 
 **Archivos en node_modules:**
 ```
 node_modules/
-└── openrouter-image-mcp/
+└── @mindbreaker81/openrouter-image/
     ├── src/
     │   ├── index.js
     │   ├── client.js
@@ -26,7 +28,7 @@ node_modules/
 
 **En su código:**
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY
@@ -40,7 +42,7 @@ const result = await client.generateImage('A sunset', {
 ## Caso 2: Usuario quiere la CLI global
 
 ```bash
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 ```
 
 **Lo que se instala:**
@@ -60,7 +62,7 @@ openrouter-image server --stdio  # Para Claude Code
 
 ```bash
 # Instala globalmente
-npm install -g openrouter-image-mcp
+npm install -g @mindbreaker81/openrouter-image
 
 # Ejecuta script de instalación
 ./scripts/install-claude.sh  # O manualmente editar ~/.claude.json
@@ -94,14 +96,14 @@ npm install -g openrouter-image-mcp
 openrouter-image --version
 
 # Ver archivos instalados
-npm list -g openrouter-image-mcp
+npm list -g @mindbreaker81/openrouter-image
 
 # Ver ubicación
 which openrouter-image
 # /usr/local/bin/openrouter-image
 
 # Ver contenido del package
-npm view openrouter-image-mcp
+npm view @mindbreaker81/openrouter-image
 ```
 
 ## Espacio en disco
@@ -115,11 +117,11 @@ npm view openrouter-image-mcp
 
 ```bash
 # Instalar versión específica
-npm install openrouter-image-mcp@0.5.0
+npm install @mindbreaker81/openrouter-image@0.5.0
 
 # Instalar última versión
-npm install openrouter-image-mcp@latest
+npm install @mindbreaker81/openrouter-image@latest
 
 # Ver versiones disponibles
-npm view openrouter-image-mcp versions
+npm view @mindbreaker81/openrouter-image versions
 ```

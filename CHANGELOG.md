@@ -1,10 +1,12 @@
+<!-- markdownlint-disable MD024 -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.5.0] - 2025-02-15 (Library Release)
+## [0.5.0] - 2026-02-15 (Library Release)
 
 ### Added
 
@@ -17,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Reads JSON-RPC from stdin, writes responses to stdout
   - No authentication required for local communication
   - `server --stdio` command in CLI
-- **Subpath exports**: Package can be imported as `openrouter-image-mcp`, `openrouter-image-mcp/client`, `openrouter-image-mcp/core`
+- **Subpath exports**: Package can be imported as `@mindbreaker81/openrouter-image`, `@mindbreaker81/openrouter-image/client`, `@mindbreaker81/openrouter-image/core`
 - **MIT License**: Added LICENSE file for public distribution
 - **`.npmignore`**: Excludes tests, scripts, and development files from npm package
 - **`package.json` updates**:

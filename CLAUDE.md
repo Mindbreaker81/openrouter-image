@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD007 MD031 MD032 -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -37,7 +39,7 @@ node --test tests/cli.test.js
 npm link
 
 # Use as a library in another Node.js project
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 ```
 
 ## Architecture
@@ -75,7 +77,7 @@ MCP server over stdin/stdout for local clients (e.g., Claude Code):
 `OpenRouterImageClient` class provides a programmatic API for Node.js applications:
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
 
 const client = new OpenRouterImageClient({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -121,9 +123,9 @@ Command-line interface using `parseArgs`:
 The [`package.json`](package.json) exports module for library usage:
 
 ```javascript
-import { OpenRouterImageClient } from 'openrouter-image-mcp';
-import { OpenRouterImageClient } from 'openrouter-image-mcp/client';
-import { callOpenRouterResponses, safeJoinOutputDir } from 'openrouter-image-mcp/core';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image';
+import { OpenRouterImageClient } from '@mindbreaker81/openrouter-image/client';
+import { callOpenRouterResponses, safeJoinOutputDir } from '@mindbreaker81/openrouter-image/core';
 ```
 
 ## Key Patterns
