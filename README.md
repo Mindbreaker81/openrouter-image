@@ -6,6 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-10%2F10-brightgreen)](tests/cli.test.js)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
+[![GitHub Release](https://img.shields.io/github/v/release/Mindbreaker81/openrouter-image?label=github%20release)](https://github.com/Mindbreaker81/openrouter-image/releases/latest)
 
 **A dual-interface MCP server and CLI for image generation/editing via OpenRouter's Responses API.**
 
