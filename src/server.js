@@ -1,19 +1,28 @@
-import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import express from "express";
+import {
+  OUTPUT_DIR,
+  OPENROUTER_IMAGE_MODEL,
+  safeJoinOutputDir,
+  assertNotSymlink,
+  callOpenRouterResponses,
+  extractBase64FromResponse,
+  stripDataUrlPrefix,
+  sniffImageMimeType,
+  listOutputImages,
+  readOutputImage,
+  fixOutputPathExtensionForMimeType,
+  summarizeOpenRouterResponse,
+  fetchOpenRouterImageModels,
+  formatModelsAsMarkdown,
+} from "./core.js";
 
 const app = express();
 app.use(express.json({ limit: "25mb" }));
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 const AUTH_TOKEN = process.env.AUTH_TOKEN || "";
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
-const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || "";
-const OUTPUT_DIR = process.env.OUTPUT_DIR || "/data";
-const OPENROUTER_SITE_URL = process.env.OPENROUTER_SITE_URL || "";
-const OPENROUTER_APP_NAME = process.env.OPENROUTER_APP_NAME || "openrouter-image-mcp";
 
 function unauthorized(res) {
   res.status(401).json({ error: "Unauthorized" });
@@ -45,269 +54,6 @@ function jsonrpcResult(id, result) {
   return { jsonrpc: "2.0", id, result };
 }
 
-function safeJoinOutputDir(relativePath) {
-  const cleaned = String(relativePath || "").replace(/^\/+/, "");
-  const target = path.resolve(OUTPUT_DIR, cleaned);
-  const base = path.resolve(OUTPUT_DIR);
-  if (!target.startsWith(base + path.sep) && target !== base) {
-    throw new Error("output_path escapes OUTPUT_DIR");
-  }
-  return target;
-}
-
-async function callOpenRouterResponses({ model, prompt, imageConfig }) {
-  if (!OPENROUTER_API_KEY) {
-    throw new Error("OPENROUTER_API_KEY is not set");
-  }
-
-  const body = {
-    model,
-    modalities: ["image"],
-    input: [
-      {
-        role: "user",
-        content: [{ type: "input_text", text: prompt }],
-      },
-    ],
-  };
-
-  if (imageConfig && typeof imageConfig === "object") {
-    body.image_config = imageConfig;
-  }
-
-  const headers = {
-    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-    "Content-Type": "application/json",
-  };
-
-  if (OPENROUTER_SITE_URL) {
-    headers["HTTP-Referer"] = OPENROUTER_SITE_URL;
-  }
-  if (OPENROUTER_APP_NAME) {
-    headers["X-Title"] = OPENROUTER_APP_NAME;
-  }
-
-  const resp = await fetch(`${OPENROUTER_BASE_URL}/responses`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`OpenRouter error ${resp.status}: ${text}`);
-  }
-
-  return await resp.json();
-}
-
-function extractBase64FromResponse(openRouterResponse) {
-  const output = openRouterResponse?.output;
-  if (Array.isArray(output)) {
-    for (const item of output) {
-      if (item?.type === "image_generation_call" && typeof item?.result === "string" && item.result.length > 0) {
-        return item.result;
-      }
-      if (item?.type === "image" && typeof item?.data === "string" && item.data.length > 0) {
-        return item.data;
-      }
-    }
-  }
-
-  const direct = openRouterResponse?.result;
-  if (typeof direct === "string" && direct.length > 0) return direct;
-
-  return null;
-}
-
-function stripDataUrlPrefix(maybeDataUrl) {
-  const str = String(maybeDataUrl || "");
-  const match = str.match(/^data:([^;]+);base64,(.*)$/s);
-  if (match) return { mimeType: match[1], base64: match[2] };
-  return { mimeType: null, base64: str };
-}
-
-function sniffImageMimeType(buf) {
-  if (!buf || buf.length < 12) return null;
-
-  // PNG signature: 89 50 4E 47 0D 0A 1A 0A
-  if (
-    buf[0] === 0x89 &&
-    buf[1] === 0x50 &&
-    buf[2] === 0x4e &&
-    buf[3] === 0x47 &&
-    buf[4] === 0x0d &&
-    buf[5] === 0x0a &&
-    buf[6] === 0x1a &&
-    buf[7] === 0x0a
-  ) {
-    return "image/png";
-  }
-
-  // JPEG signature: FF D8 FF
-  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
-    return "image/jpeg";
-  }
-
-  // GIF: GIF87a / GIF89a
-  if (
-    buf[0] === 0x47 &&
-    buf[1] === 0x49 &&
-    buf[2] === 0x46 &&
-    buf[3] === 0x38 &&
-    (buf[4] === 0x37 || buf[4] === 0x39) &&
-    buf[5] === 0x61
-  ) {
-    return "image/gif";
-  }
-
-  // WEBP: RIFF....WEBP
-  if (
-    buf[0] === 0x52 &&
-    buf[1] === 0x49 &&
-    buf[2] === 0x46 &&
-    buf[3] === 0x46 &&
-    buf[8] === 0x57 &&
-    buf[9] === 0x45 &&
-    buf[10] === 0x42 &&
-    buf[11] === 0x50
-  ) {
-    return "image/webp";
-  }
-
-  return null;
-}
-
-function desiredExtensionsForMimeType(mimeType) {
-  switch (mimeType) {
-    case "image/png":
-      return [".png"];
-    case "image/jpeg":
-      return [".jpg", ".jpeg"];
-    case "image/gif":
-      return [".gif"];
-    case "image/webp":
-      return [".webp"];
-    default:
-      return null;
-  }
-}
-
-function fixOutputPathExtensionForMimeType(outputPath, mimeType) {
-  const desiredExts = desiredExtensionsForMimeType(mimeType);
-  if (!desiredExts) return { outputPath, changed: false };
-
-  const original = String(outputPath || "");
-  const ext = path.extname(original);
-  const extLower = ext.toLowerCase();
-
-  // If there is no extension, append the primary one.
-  if (!extLower) {
-    return { outputPath: `${original}${desiredExts[0]}`, changed: true };
-  }
-
-  // If current extension is already acceptable, keep it.
-  if (desiredExts.includes(extLower)) {
-    return { outputPath: original, changed: false };
-  }
-
-  // If it's a known image extension but doesn't match detected mime, replace it.
-  const knownImageExts = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp"]);
-  if (knownImageExts.has(extLower)) {
-    return { outputPath: `${original.slice(0, -ext.length)}${desiredExts[0]}`, changed: true };
-  }
-
-  // Unknown extension: leave as-is.
-  return { outputPath: original, changed: false };
-}
-
-function summarizeOpenRouterResponse(openRouterResponse) {
-  const output = openRouterResponse?.output;
-  const outputTypes = Array.isArray(output)
-    ? output
-        .map((item) => item?.type)
-        .filter((t) => typeof t === "string")
-        .slice(0, 20)
-    : null;
-
-  return {
-    id: openRouterResponse?.id ?? null,
-    status: openRouterResponse?.status ?? null,
-    model: openRouterResponse?.model ?? null,
-    output_types: outputTypes,
-    has_output: Array.isArray(output),
-  };
-}
-
-const OPENROUTER_MODELS_API = "https://openrouter.ai/api/frontend/models/find";
-
-async function fetchOpenRouterImageModels() {
-  const resp = await fetch(`${OPENROUTER_MODELS_API}?fmt=cards&output_modalities=image`);
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`OpenRouter models API error ${resp.status}: ${text}`);
-  }
-  const json = await resp.json();
-  return json?.data?.models ?? [];
-}
-
-function estimateCostPerImage(model) {
-  const pricing = model?.endpoint?.pricing ?? {};
-  const pricingJson = model?.endpoint?.pricing_json ?? {};
-
-  if (pricingJson["sourceful:cents_per_image_output"] != null) {
-    const cents = parseFloat(pricingJson["sourceful:cents_per_image_output"]) || 0;
-    const usd = cents / 100;
-    const cost = usd.toFixed(2);
-    const notes = `Sourceful: ${cents}¢/imagen`;
-    return { costUsd: `$${cost}`, notes, sortKey: usd };
-  }
-  if (pricingJson["sourceful:cents_per_2k_image_output"] != null) {
-    const cents = parseFloat(pricingJson["sourceful:cents_per_2k_image_output"]) || 0;
-    const usd = cents / 100;
-    const cost = usd.toFixed(2);
-    return { costUsd: `$${cost}`, notes: `Sourceful 2K: ${cents}¢`, sortKey: usd };
-  }
-  if (pricingJson["bfl:informational_output_megapixels"] != null) {
-    const usd = parseFloat(pricingJson["bfl:informational_output_megapixels"]) || 0;
-    return { costUsd: `$${usd.toFixed(3)}`, notes: "BFL: 1ª MP", sortKey: usd };
-  }
-  if (pricingJson["seedream:cents_per_image_output"] != null) {
-    const cents = parseFloat(pricingJson["seedream:cents_per_image_output"]) || 0;
-    const usd = cents / 100;
-    const cost = usd.toFixed(2);
-    return { costUsd: `$${cost}`, notes: "Seedream: tarifa fija", sortKey: usd };
-  }
-
-  const imageOutput = parseFloat(pricing?.image_output ?? pricing?.image_token);
-  if (typeof imageOutput === "number" && imageOutput > 0) {
-    const estUsd = imageOutput * 1024;
-    const cost = estUsd < 0.01 ? estUsd.toFixed(3) : estUsd.toFixed(2);
-    return { costUsd: `~$${cost}`, notes: `~1024 tokens × $${imageOutput}/token`, sortKey: estUsd };
-  }
-
-  return { costUsd: "—", notes: "sin precio en API", sortKey: Infinity };
-}
-
-function formatModelsAsMarkdown(models) {
-  const withCost = models.map((m) => {
-    const est = estimateCostPerImage(m);
-    return {
-      id: m.permaslug ?? m.slug ?? "",
-      name: m.name ?? m.short_name ?? "",
-      provider: m.endpoint?.provider_display_name ?? m.author ?? "",
-      imageOutput: m.endpoint?.pricing?.image_output ?? m.endpoint?.pricing?.image_token ?? "—",
-      ...est,
-    };
-  });
-  withCost.sort((a, b) => (a.sortKey ?? Infinity) - (b.sortKey ?? Infinity));
-
-  const rows = withCost.map((r) => `| ${r.id} | ${r.name} | ${r.provider} | ${r.imageOutput} | ${r.costUsd} | ${r.notes} |`);
-  const header = "| id | name | provider | image_output | coste/imagen aprox. | notas |";
-  const sep = "|---|---|---|:---:|---:|---|";
-  return `# OpenRouter modelos de imagen (output_modalities=image)\n\nDatos obtenidos de la API de OpenRouter.\n\n${header}\n${sep}\n${rows.join("\n")}\n`;
-}
-
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
@@ -337,7 +83,7 @@ app.post("/mcp", async (req, res) => {
             protocolVersion,
             serverInfo: {
               name: "openrouter-image-mcp",
-              version: "0.2.0",
+              version: "0.3.0",
             },
             capabilities: {
               tools: {},
@@ -373,6 +119,28 @@ app.post("/mcp", async (req, res) => {
                 }
               },
               {
+                name: "edit_image",
+                description: "Edit / transform an existing image under OUTPUT_DIR using OpenRouter (image-to-image via Responses API).",
+                inputSchema: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    prompt: { type: "string", minLength: 1 },
+                    input_image_path: { type: "string", minLength: 1, description: "Relative path under OUTPUT_DIR for the input image." },
+                    model: { type: "string", minLength: 1, description: "OpenRouter model id. Defaults to OPENROUTER_IMAGE_MODEL." },
+                    image_config: { type: "object", description: "Provider-specific image configuration passed through to OpenRouter." },
+                    output_path: { type: "string", description: "Relative path under OUTPUT_DIR to save the edited image." },
+                    mime_type: { type: "string", description: "MIME type for the returned MCP image content (default detected automatically)." },
+                    return_base64: {
+                      type: "boolean",
+                      description: "If false, do not include the base64 image in the MCP response (prevents huge JSON payloads).",
+                      default: true,
+                    }
+                  },
+                  required: ["prompt", "input_image_path"]
+                }
+              },
+              {
                 name: "list_image_models",
                 description: "List OpenRouter image generation models with pricing and approximate cost per image. Fetches fresh data from the OpenRouter API.",
                 inputSchema: {
@@ -380,6 +148,40 @@ app.post("/mcp", async (req, res) => {
                   additionalProperties: false,
                   properties: {},
                   required: []
+                }
+              },
+              {
+                name: "list_output_images",
+                description: "List image files currently stored under OUTPUT_DIR.",
+                inputSchema: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    prefix: { type: "string", description: "Optional relative subfolder under OUTPUT_DIR (e.g. tests/)." },
+                    recursive: { type: "boolean", default: true },
+                    limit: { type: "integer", minimum: 1, maximum: 1000, default: 200 },
+                    include_non_images: { type: "boolean", default: false },
+                    sort: {
+                      type: "string",
+                      enum: ["mtime_desc", "mtime_asc", "size_desc", "size_asc", "name_asc", "name_desc"],
+                      default: "mtime_desc",
+                    }
+                  },
+                  required: []
+                }
+              },
+              {
+                name: "read_output_image",
+                description: "Read an image from OUTPUT_DIR and return it as MCP image content.",
+                inputSchema: {
+                  type: "object",
+                  additionalProperties: false,
+                  properties: {
+                    path: { type: "string", minLength: 1, description: "Relative path under OUTPUT_DIR to the image file." },
+                    mime_type: { type: "string", description: "Override MIME type for MCP response (default detected automatically)." },
+                    return_base64: { type: "boolean", default: true, description: "If false, do not include the base64 image in the MCP response." }
+                  },
+                  required: ["path"]
                 }
               }
             ],
@@ -409,7 +211,71 @@ app.post("/mcp", async (req, res) => {
           continue;
         }
 
-        if (name !== "generate_image") {
+        if (name === "list_output_images") {
+          try {
+            const markdown = await listOutputImages({
+              prefix: typeof args?.prefix === "string" ? args.prefix : "",
+              recursive: args?.recursive !== false,
+              limit: args?.limit,
+              includeNonImages: args?.include_non_images === true,
+              sort: typeof args?.sort === "string" ? args.sort : "mtime_desc",
+            });
+            responses.push(
+              jsonrpcResult(id, {
+                content: [{ type: "text", text: markdown }],
+                isError: false,
+              })
+            );
+          } catch (err) {
+            const message = err instanceof Error ? err.message : "Unknown error";
+            responses.push(jsonrpcError(id, -32000, `Failed to list output images: ${message}`));
+          }
+          continue;
+        }
+
+        if (name === "read_output_image") {
+          const p = args?.path;
+          const returnBase64 = args?.return_base64 !== false;
+          const mimeTypeOverride = args?.mime_type;
+
+          if (typeof p !== "string" || p.trim().length === 0) {
+            responses.push(jsonrpcError(id, -32602, "Invalid params", { field: "path" }));
+            continue;
+          }
+
+          try {
+            const img = await readOutputImage({ imagePath: p.trim() });
+            const requestedMimeType = typeof mimeTypeOverride === "string" ? mimeTypeOverride.trim() : "";
+            const mimeType = (requestedMimeType || img.detectedMimeType).trim();
+
+            const textParts = [];
+            textParts.push(`path: ${p.trim()}`);
+            textParts.push(`abs_path: ${img.abs}`);
+            textParts.push(`bytes: ${img.byteLength}`);
+            if (mimeType !== img.detectedMimeType) {
+              textParts.push(`mime_type: ${mimeType} (requested; detected: ${img.detectedMimeType})`);
+            } else {
+              textParts.push(`mime_type: ${mimeType}`);
+            }
+            textParts.push(`base64_in_response: ${returnBase64 ? "yes" : "no"}`);
+
+            const content = [{ type: "text", text: textParts.join("\n") }];
+            if (returnBase64) content.push({ type: "image", data: img.base64, mimeType });
+
+            responses.push(
+              jsonrpcResult(id, {
+                content,
+                isError: false,
+              })
+            );
+          } catch (err) {
+            const message = err instanceof Error ? err.message : "Unknown error";
+            responses.push(jsonrpcError(id, -32000, `Failed to read output image: ${message}`));
+          }
+          continue;
+        }
+
+        if (name !== "generate_image" && name !== "edit_image") {
           responses.push(jsonrpcError(id, -32601, "Method not found"));
           continue;
         }
@@ -420,10 +286,17 @@ app.post("/mcp", async (req, res) => {
         const outputPath = args?.output_path;
         const mimeTypeOverride = args?.mime_type;
         const returnBase64 = args?.return_base64 !== false;
+        const inputImagePath = args?.input_image_path;
 
         if (typeof prompt !== "string" || prompt.trim().length === 0) {
           responses.push(jsonrpcError(id, -32602, "Invalid params", { field: "prompt" }));
           continue;
+        }
+        if (name === "edit_image") {
+          if (typeof inputImagePath !== "string" || inputImagePath.trim().length === 0) {
+            responses.push(jsonrpcError(id, -32602, "Invalid params", { field: "input_image_path" }));
+            continue;
+          }
         }
         if (!model) {
           responses.push(
@@ -435,10 +308,20 @@ app.post("/mcp", async (req, res) => {
           continue;
         }
 
+        let inputImageDataUrl = null;
+        if (name === "edit_image") {
+          const absInput = safeJoinOutputDir(String(inputImagePath).trim());
+          await assertNotSymlink(absInput);
+          const inputBytes = await fs.readFile(absInput);
+          const inputMime = sniffImageMimeType(inputBytes) || "image/png";
+          inputImageDataUrl = `data:${inputMime};base64,${inputBytes.toString("base64")}`;
+        }
+
         const openRouterResponse = await callOpenRouterResponses({
           model,
           prompt: prompt.trim(),
           imageConfig,
+          inputImageDataUrl,
         });
 
         const base64Raw = extractBase64FromResponse(openRouterResponse);
@@ -473,7 +356,11 @@ app.post("/mcp", async (req, res) => {
         }
 
         const textParts = [];
+        textParts.push(`tool: ${name}`);
         textParts.push(`model: ${model}`);
+        if (name === "edit_image" && typeof inputImagePath === "string") {
+          textParts.push(`input_image_path: ${inputImagePath.trim()}`);
+        }
         if (savedTo) {
           if (effectiveOutputPath) textParts.push(`output_path: ${effectiveOutputPath}`);
           if (outputPathFixed && typeof outputPath === "string") textParts.push(`output_path_fixed_from: ${outputPath.trim()}`);

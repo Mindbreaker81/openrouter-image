@@ -4,6 +4,60 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.4.0] - 2026-02-15
+
+### Añadido
+
+- **CLI (`src/cli.js`)**: nueva interfaz de línea de comandos con los mismos flujos que el MCP server.
+  - Comandos: `generate`, `edit`, `models`, `list`, `read`.
+  - Instalable globalmente vía `npm link` o `npm install -g`.
+  - Binario: `openrouter-image`.
+  - Flags: `--model`/`-m`, `--output`/`-o`, `--input`/`-i`, `--config`/`-c`, `--no-base64`, `--prefix`, `--recursive`, `--limit`, `--sort`, `--mime-type`, `--copy-to`.
+- **Módulo compartido (`src/core.js`)**: toda la lógica de negocio extraída del servidor a un módulo reutilizable.
+  - Exporta: `callOpenRouterResponses`, `extractBase64FromResponse`, `stripDataUrlPrefix`, `sniffImageMimeType`, `fixOutputPathExtensionForMimeType`, `listOutputImages`, `readOutputImage`, `fetchOpenRouterImageModels`, `formatModelsAsMarkdown`, `safeJoinOutputDir`, `assertNotSymlink`, `summarizeOpenRouterResponse`.
+- **`Dockerfile.cli`**: imagen Docker dedicada para ejecutar la CLI en contenedores (separada del `Dockerfile` del MCP server).
+- **Tests (`tests/cli.test.js`)**: suite de tests con `node:test` (10 tests).
+  - Tests de validación de argumentos (help, comando desconocido, prompt/modelo faltante, edit sin input, limit inválido, read sin path).
+  - Tests de integración con mock HTTP local simulando endpoints OpenRouter (`/responses` y `/models/find`).
+  - Verificación de corrección automática de extensión de archivo.
+- **Script `scripts/models_clean.js`**: genera `output/models-clean.md` filtrando solo modelos con precio.
+- **`package.json`**: añadidos `bin` (`openrouter-image`), scripts `cli` y `test`.
+
+### Cambiado
+
+- **`src/server.js`**: refactorizado para importar toda la lógica desde `src/core.js` (elimina duplicación).
+- **`README.md`**: reescrito completamente con documentación exhaustiva:
+  - Tabla de contenidos, requisitos, instalación (clone, npm link, npm pack, Docker).
+  - Variables de entorno con tabla detallada.
+  - Servidor MCP: Docker Compose, Docker standalone, Node.js directo.
+  - CLI: todos los comandos con flags, ejemplos y salida esperada.
+  - Docker CLI con `Dockerfile.cli`.
+  - Referencia completa de las 5 MCP tools con tablas de parámetros.
+  - Configuración para 8 herramientas de coding (Cursor, Claude Code, VS Code, Windsurf, etc.).
+  - Ejemplos curl JSON-RPC.
+  - Sección de tests, estructura del proyecto y seguridad.
+
+## [0.3.0] - 2026-02-13
+
+### Añadido
+
+- **Tool `list_output_images`**: lista imágenes guardadas bajo `OUTPUT_DIR` (soporta prefix, recursivo, orden y límite).
+- **Tool `read_output_image`**: devuelve una imagen guardada como contenido MCP (`type: image`) para poder "recuperarla" sin tener que re-generar base64.
+- **Tool `edit_image`**: image-to-image usando OpenRouter Responses API (lee `input_image_path` desde `OUTPUT_DIR` y genera una nueva imagen).
+
+### Seguridad
+
+- Las tools que acceden a disco rechazan symlinks bajo `OUTPUT_DIR`.
+
+## [0.2.1] - 2026-02-13
+
+### Cambiado
+
+- **Documentación expandida**: añadida guía completa de configuración para múltiples herramientas de coding (Claude Code, Cursor, VS Code, Windsurf, Continue, Roo Code, JetBrains, Cline).
+- **Nueva documentación**: `MCP_CLIENT_CONFIG_GUIDE.md` con ejemplos detallados, troubleshooting y comparación de formatos de configuración entre herramientas.
+- **Variables de entorno**: documentadas `PORT` y `OUTPUT_DIR` en README.md.
+- **Configuración en Cursor**: actualizada y alineada con la nueva guía completa.
+
 ## [0.2.0] - 2026-02-07
 
 ### Añadido
@@ -23,12 +77,3 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - Soporte para guardar imágenes en disco (volumen montado `/data`).
 - Endpoint `GET /health` para healthcheck.
 - Variables de entorno: `AUTH_TOKEN`, `OPENROUTER_API_KEY`, `OPENROUTER_IMAGE_MODEL`, etc.
-
-## [0.2.0] - 2026-02-13
-
-### Cambiado
-
-- **Documentación expandida**: añadida guía completa de configuración para múltiples herramientas de coding (Claude Code, Cursor, VS Code, Windsurf, Continue, Roo Code, JetBrains, Cline).
-- **Nueva documentación**: `MCP_CLIENT_CONFIG_GUIDE.md` con ejemplos detallados, troubleshooting y comparación de formatos de configuración entre herramientas.
-- **Variables de entorno**: documentadas `PORT` y `OUTPUT_DIR` en README.md.
-- **Configuración en Cursor**: actualizada y alineada con la nueva guía completa.
