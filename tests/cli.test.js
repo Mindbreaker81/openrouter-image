@@ -122,7 +122,7 @@ test("read requires path", async () => {
 });
 
 test("generate happy path saves image using mocked OpenRouter", async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "or-mcp-cli-generate-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "or-cli-generate-"));
 
   await runWithMockServer(
     (req, res, body) => {
@@ -165,7 +165,7 @@ test("generate happy path saves image using mocked OpenRouter", async () => {
 });
 
 test("edit happy path reads input and fixes output extension", async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "or-mcp-cli-edit-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "or-cli-edit-"));
   const inputPath = path.join(tmpDir, "input.png");
   await fs.writeFile(inputPath, Buffer.from(ONE_BY_ONE_PNG_BASE64, "base64"));
 
