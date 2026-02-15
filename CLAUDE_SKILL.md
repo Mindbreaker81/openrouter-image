@@ -29,7 +29,7 @@ npm install -g @your-org/openrouter-image
 ### Option 2: Install from git repository
 
 ```bash
-git clone https://github.com/YOUR_USER/openrouter-image.git
+git clone https://github.com/mindbreaker81/openrouter-image.git
 cd openrouter-image
 npm install
 npm link

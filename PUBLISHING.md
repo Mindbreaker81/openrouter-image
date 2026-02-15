@@ -40,7 +40,17 @@ npm login
 
 ### 3. Verify Package Contents
 
+> **Important: about the `.tgz` file**
+>
+> The file `mindbreaker81-openrouter-image-<version>.tgz` is a **temporary package artifact** created by `npm pack`.
+> It is the exact bundle npm will publish, and is used to validate what will be shipped before running `npm publish`.
+>
+> - It is generated locally with `npm pack`
+> - It is used for local install tests (`npm install -g ./...tgz`)
+> - It is **not required to be committed to git** (normally it should not be versioned)
+
 ```bash
+# Generates: mindbreaker81-openrouter-image-<version>.tgz
 npm pack
 tar -tzf mindbreaker81-openrouter-image-0.5.0.tgz
 ```
@@ -72,6 +82,8 @@ mkdir /tmp/test-library && cd /tmp/test-library
 npm install ../mindbreaker81-openrouter-image-0.5.0.tgz
 node -e "import('./node_modules/@mindbreaker81/openrouter-image/src/index.js').then(m => console.log('Version:', m.version))"
 ```
+
+If you don't have the `.tgz` file yet, run `npm pack` first in the project root.
 
 ### 5. Publish to npm
 
