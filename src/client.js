@@ -58,7 +58,7 @@ export class OpenRouterImageClient {
     this._defaultModel = config.defaultModel || OPENROUTER_IMAGE_MODEL || "";
     this._outputDir = config.outputDir || OUTPUT_DIR || "/data";
     this._siteUrl = config.siteUrl || "";
-    this._appName = config.appName || "openrouter-image-mcp";
+    this._appName = config.appName || "openrouter-image";
 
     // Validation
     if (!this._apiKey) {

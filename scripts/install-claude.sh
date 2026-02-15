@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Claude Code Skill Installation Script for openrouter-image-mcp
+# Claude Code Skill Installation Script for openrouter-image
 # This script installs and configures the package for use with Claude Code
 
 # Colors
@@ -40,7 +40,7 @@ get_package_name() {
   if [ -n "${1:-}" ]; then
     echo "$1"
   else
-    echo "openrouter-image-mcp"
+    echo "@mindbreaker81/openrouter-image"
   fi
 }
 
@@ -186,7 +186,6 @@ configure_claude() {
 
     // Remove old configuration if exists
     delete config.mcpServers['openrouter-image'];
-    delete config.mcpServers['openrouter-image-mcp'];
 
     // Add new configuration
     config.mcpServers['openrouter-image'] = {
@@ -258,7 +257,7 @@ print_next_steps() {
 main() {
   echo
   echo "========================================"
-  echo "  openrouter-image-mcp Installer"
+  echo "  openrouter-image Installer"
   echo "  for Claude Code"
   echo "========================================"
   echo

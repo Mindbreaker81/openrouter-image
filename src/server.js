@@ -88,7 +88,7 @@ app.post("/mcp", async (req, res) => {
           jsonrpcResult(id, {
             protocolVersion,
             serverInfo: {
-              name: "openrouter-image-mcp",
+              name: "openrouter-image",
               version: SERVER_VERSION,
             },
             capabilities: {
@@ -426,7 +426,7 @@ async function main() {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
   app.listen(PORT, "0.0.0.0", () => {
     // eslint-disable-next-line no-console
-    console.log(`openrouter-image-mcp listening on :${PORT}`);
+    console.log(`openrouter-image listening on :${PORT}`);
   });
 }
 

@@ -6,7 +6,7 @@ export const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || "https://o
 export const OPENROUTER_IMAGE_MODEL = process.env.OPENROUTER_IMAGE_MODEL || "";
 export const OUTPUT_DIR = process.env.OUTPUT_DIR || "/data";
 export const OPENROUTER_SITE_URL = process.env.OPENROUTER_SITE_URL || "";
-export const OPENROUTER_APP_NAME = process.env.OPENROUTER_APP_NAME || "openrouter-image-mcp";
+export const OPENROUTER_APP_NAME = process.env.OPENROUTER_APP_NAME || "openrouter-image";
 
 export function safeJoinOutputDir(relativePath) {
   const cleaned = String(relativePath || "").replace(/^\/+/, "");

@@ -1,6 +1,6 @@
-# Contributing to openrouter-image-mcp
+# Contributing to openrouter-image
 
-Thank you for your interest in contributing to openrouter-image-mcp! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to openrouter-image! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 
@@ -30,8 +30,8 @@ Thank you for your interest in contributing to openrouter-image-mcp! This docume
 
 ```bash
 # Clone the repository
-git clone https://github.com/mindbreaker81/openrouter-image-mcp.git
-cd openrouter-image-mcp
+git clone https://github.com/mindbreaker81/openrouter-image.git
+cd openrouter-image
 
 # Install dependencies
 npm install
@@ -260,8 +260,8 @@ Include:
 
 ## Questions?
 
-- Check existing [Issues](https://github.com/mindbreaker81/openrouter-image-mcp/issues)
-- Start a [Discussion](https://github.com/mindbreaker81/openrouter-image-mcp/discussions)
+- Check existing [Issues](https://github.com/mindbreaker81/openrouter-image/issues)
+- Start a [Discussion](https://github.com/mindbreaker81/openrouter-image/discussions)
 - Read the [Documentation](README.md)
 
 ## License

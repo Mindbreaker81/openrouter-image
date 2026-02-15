@@ -2,7 +2,7 @@
 
 # Claude Code Skill Installation Guide
 
-This document describes how to install and use `openrouter-image-mcp` as a Claude Code skill.
+This document describes how to install and use `openrouter-image` as a Claude Code skill.
 
 ## Prerequisites
 
@@ -29,8 +29,8 @@ npm install -g @your-org/openrouter-image
 ### Option 2: Install from git repository
 
 ```bash
-git clone https://github.com/YOUR_USER/openrouter-image-mcp.git
-cd openrouter-image-mcp
+git clone https://github.com/YOUR_USER/openrouter-image.git
+cd openrouter-image
 npm install
 npm link
 ```
@@ -365,7 +365,7 @@ openrouter-image server --port 3003
 ## Support
 
 For issues or questions:
-- GitHub: https://github.com/YOUR_USER/openrouter-image-mcp
+- GitHub: https://github.com/YOUR_USER/openrouter-image
 - OpenRouter Docs: https://openrouter.ai/docs
 - Claude Code Docs: https://claude.ai/code
 

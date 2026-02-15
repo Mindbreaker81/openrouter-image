@@ -148,7 +148,7 @@ If you get "403 Forbidden - name already exists", you need to use a scoped name:
 
 ```json
 {
-  "name": "@your-username/openrouter-image-mcp"
+  "name": "@your-username/openrouter-image"
 }
 ```
 

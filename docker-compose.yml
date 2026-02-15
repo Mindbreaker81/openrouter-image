@@ -1,7 +1,7 @@
 services:
-  openrouter-image-mcp:
+  openrouter-image:
     build: .
-    container_name: openrouter-image-mcp
+    container_name: openrouter-image
     environment:
       - PORT=3000
       - AUTH_TOKEN=${AUTH_TOKEN}
@@ -10,7 +10,7 @@ services:
       - OPENROUTER_IMAGE_MODEL=${OPENROUTER_IMAGE_MODEL}
       - OUTPUT_DIR=/data
       - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-}
-      - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-openrouter-image-mcp}
+      - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-openrouter-image}
     ports:
       - "3003:3000"
     volumes:

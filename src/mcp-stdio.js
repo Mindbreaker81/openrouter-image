@@ -29,7 +29,7 @@ import {
 const packageJson = await import("../package.json", { with: { type: "json" } });
 
 const SERVER_INFO = {
-  name: "openrouter-image-mcp",
+  name: "openrouter-image",
   version: packageJson.default.version,
 };
 

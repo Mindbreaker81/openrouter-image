@@ -1,5 +1,5 @@
 /**
- * openrouter-image-mcp - Library entry point
+ * openrouter-image - Library entry point
  *
  * A dual-interface MCP server and CLI for image generation/editing via OpenRouter's Responses API.
  * This module provides the main exports for using the package as a library.

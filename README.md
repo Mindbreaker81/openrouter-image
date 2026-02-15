@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD024 MD031 MD032 MD040 MD051 MD060 -->
 
-# openrouter-image-mcp
+# openrouter-image
 
 [![npm version](https://badge.fury.io/js/%40mindbreaker81%2Fopenrouter-image.svg)](https://www.npmjs.com/package/@mindbreaker81/openrouter-image)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -152,8 +152,8 @@ npm install -g @mindbreaker81/openrouter-image
 ### Install from git
 
 ```bash
-git clone https://github.com/mindbreaker81/openrouter-image-mcp.git
-cd openrouter-image-mcp
+git clone https://github.com/mindbreaker81/openrouter-image.git
+cd openrouter-image
 npm install
 npm link
 ```
@@ -176,8 +176,8 @@ npm install @mindbreaker81/openrouter-image
 ## Requirements
 
 ```bash
-git clone https://github.com/mindbreaker81/openrouter-image-mcp.git
-cd openrouter-image-mcp
+git clone https://github.com/mindbreaker81/openrouter-image.git
+cd openrouter-image
 npm ci
 ```
 
@@ -200,7 +200,7 @@ cp .env.example .env
 | `PORT` | no | `3000` | Puerto del servidor HTTP (MCP) |
 | `OPENROUTER_BASE_URL` | no | `https://openrouter.ai/api/v1` | Base URL de la API de OpenRouter |
 | `OPENROUTER_SITE_URL` | no | — | Header `HTTP-Referer` enviado a OpenRouter |
-| `OPENROUTER_APP_NAME` | no | `openrouter-image-mcp` | Header `X-Title` enviado a OpenRouter |
+| `OPENROUTER_APP_NAME` | no | `openrouter-image` | Header `X-Title` enviado a OpenRouter |
 
 > **Nota**: `AUTH_TOKEN` solo lo usa el servidor MCP. La CLI solo necesita `OPENROUTER_API_KEY` y opcionalmente `OUTPUT_DIR`.
 
@@ -227,15 +227,15 @@ Saved images will be in `./output/` (mounted as `/data` in the container).
 ### Run with Docker standalone
 
 ```bash
-docker build -t openrouter-image-mcp .
+docker build -t openrouter-image .
 
-docker run -d --name openrouter-image-mcp \
+docker run -d --name openrouter-image \
   -p 3003:3000 \
   -e AUTH_TOKEN=mi-token-secreto \
   -e OPENROUTER_API_KEY=sk-or-... \
   -e OPENROUTER_IMAGE_MODEL=google/gemini-2.5-flash-image \
   -v $(pwd)/output:/data \
-  openrouter-image-mcp
+  openrouter-image
 ```
 
 ### Run with Node.js (HTTP mode)
@@ -502,7 +502,7 @@ Este servidor MCP es compatible con múltiples herramientas de desarrollo asisti
 ```jsonc
 {
   "mcpServers": {  // o "servers" para VS Code
-    "openrouter-image-mcp": {
+    "openrouter-image": {
       "url": "http://localhost:3003/mcp",
       "headers": {
         "Authorization": "Bearer TU_AUTH_TOKEN"
@@ -519,7 +519,7 @@ En `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "openrouter-image-mcp": {
+    "openrouter-image": {
       "url": "http://localhost:3003/mcp",
       "headers": {
         "Authorization": "Bearer ${env:AUTH_TOKEN}"
@@ -534,7 +534,7 @@ En `~/.cursor/mcp.json`:
 #### Opción 1: CLI
 
 ```bash
-claude mcp add --transport http openrouter-image-mcp \
+claude mcp add --transport http openrouter-image \
   http://localhost:3003/mcp \
   --env AUTH_TOKEN="tu-token-aqui"
 ```
@@ -544,7 +544,7 @@ claude mcp add --transport http openrouter-image-mcp \
 ```json
 {
   "mcpServers": {
-    "openrouter-image-mcp": {
+    "openrouter-image": {
       "type": "http",
       "url": "http://localhost:3003/mcp",
       "headers": {
@@ -562,7 +562,7 @@ En `.vscode/mcp.json` (raíz del proyecto):
 ```json
 {
   "servers": {
-    "openrouter-image-mcp": {
+    "openrouter-image": {
       "type": "http",
       "url": "http://localhost:3003/mcp",
       "headers": {
@@ -590,7 +590,7 @@ Si ejecutas el MCP server en una máquina remota (ej. vía Tailscale):
 ```json
 {
   "mcpServers": {
-    "openrouter-image-mcp": {
+    "openrouter-image": {
       "url": "http://100.82.111.22:3003/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_TOKEN"
@@ -711,7 +711,7 @@ Los tests cubren:
 ## Project Structure
 
 ```
-openrouter-image-mcp/
+openrouter-image/
 ├── src/
 │   ├── core.js          # Lógica compartida (API calls, file handling, models)
 │   ├── server.js        # Servidor MCP HTTP (Express, JSON-RPC)

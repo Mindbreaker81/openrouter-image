@@ -2,7 +2,7 @@
 
 **Comprehensive guide for configuring HTTP-based MCP servers across popular AI coding tools and IDEs**
 
-This guide explains how to configure your openrouter-image-mcp server (running at `http://localhost:3003/mcp` with Bearer token authentication) across different AI coding tools.
+This guide explains how to configure your openrouter-image server (running at `http://localhost:3003/mcp` with Bearer token authentication) across different AI coding tools.
 
 ---
 
@@ -27,7 +27,7 @@ This guide explains how to configure your openrouter-image-mcp server (running a
 
 ## Server Details
 
-**Your openrouter-image-mcp server:**
+**Your openrouter-image server:**
 - **URL**: `http://localhost:3003/mcp`
 - **Authentication**: Bearer token (set via `AUTH_TOKEN` environment variable)
 - **Transport**: HTTP (JSON-RPC over HTTP POST)
@@ -210,7 +210,7 @@ export AUTH_TOKEN="your-auth-token-from-env-file"
 **Supported Transports:**
 | Transport | Type Field | Use Case |
 |-----------|------------|-----------|
-| HTTP | `"http"` or omitted | Remote servers (recommended for openrouter-image-mcp) |
+| HTTP | `"http"` or omitted | Remote servers (recommended for openrouter-image) |
 | SSE | `"sse"` | Legacy server-sent events |
 | Stdio | `"stdio"` | Local command-line servers |
 
@@ -278,7 +278,7 @@ export AUTH_TOKEN="your-auth-token-from-env-file"
 5. Follow authentication prompts if needed
 
 **HTTP Server Configuration:**
-- For custom HTTP servers like openrouter-image-mcp, add manually via Cline's MCP settings
+- For custom HTTP servers like openrouter-image, add manually via Cline's MCP settings
 - Cline supports the standard MCP JSON-RPC format over HTTP
 
 **Limitations:**
@@ -400,14 +400,14 @@ roo mcp add openrouter-image \
 
 **Supported Transports:**
 - **stdio**: For local MCP servers
-- **Streamable HTTP**: For HTTP-based servers (recommended for openrouter-image-mcp)
+- **Streamable HTTP**: For HTTP-based servers (recommended for openrouter-image)
 - **SSE**: Legacy server-sent events support
 
 ---
 
 ## Configuration Format Comparison
 
-### HTTP Server Configuration (Recommended for openrouter-image-mcp)
+### HTTP Server Configuration (Recommended for openrouter-image)
 
 **Claude Code, Cursor, JetBrains, Roo, Windsurf:**
 ```json
@@ -464,7 +464,7 @@ roo mcp add openrouter-image \
 
 ## Authentication Methods
 
-### 1. Bearer Token (Recommended for openrouter-image-mcp)
+### 1. Bearer Token (Recommended for openrouter-image)
 
 **Format:**
 ```json
@@ -528,7 +528,7 @@ roo mcp add openrouter-image \
 
 ### 3. OAuth 2.0
 
-**Not applicable to openrouter-image-mcp**, but supported by some tools:**
+**Not applicable to openrouter-image**, but supported by some tools:**
 - Cursor: Built-in OAuth support for some MCP servers
 - VS Code: Supports OAuth via MCP auth spec
 - Windsurf: OAuth support for compatible servers
@@ -656,7 +656,7 @@ curl -X POST http://localhost:3003/mcp \
 
 ## Example: Full Config for Multiple Tools
 
-**Scenario**: You want to use openrouter-image-mcp in Claude Code, Cursor, and VS Code
+**Scenario**: You want to use openrouter-image in Claude Code, Cursor, and VS Code
 
 **Claude Code** (`~/.claude.json`):
 ```json
@@ -719,4 +719,4 @@ export AUTH_TOKEN="your-auth-token-here"
 
 **Last Updated**: 2026-02-13
 
-**For issues or questions**, refer to tool-specific documentation links above or check server logs in: `/home/erosales/proyectos/openrouter-image-mcp/output/`
+**For issues or questions**, refer to tool-specific documentation links above or check server logs in: `/home/erosales/proyectos/openrouter-image/output/`
