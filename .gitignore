@@ -4,3 +4,12 @@ output/
 coverage/
 .DS_Store
 *.tgz
+
+# SSH y claves privadas (nunca commitear)
+ssh-config/
+*.pem
+id_rsa
+id_rsa_*
+id_ed25519
+id_ed25519.pub
+*.key
