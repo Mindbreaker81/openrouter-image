@@ -178,6 +178,8 @@ Copia `.env.example` a `.env` y rellena los valores:
 cp .env.example .env
 ```
 
+Si quieres guardar las imágenes en `./output` en lugar de `/data`, define en tu `.env`: `OUTPUT_DIR=./output`. Lo usan tanto el servidor MCP como la CLI.
+
 | Variable | Requerida | Default | Descripción |
 |---|:---:|---|---|
 | `OPENROUTER_API_KEY` | **sí** | — | API key de OpenRouter |
